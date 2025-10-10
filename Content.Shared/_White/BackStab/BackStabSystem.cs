@@ -1,3 +1,5 @@
+using System.Numerics;
+using System.Runtime.CompilerServices;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Prototypes;
 using Content.Shared.Mobs.Components;
@@ -13,12 +15,12 @@ namespace Content.Shared._White.BackStab;
 
 public sealed class BackStabSystem : EntitySystem
 {
-    [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
-    [Dependency] private readonly INetManager _net = default!;
-    [Dependency] private readonly SharedTransformSystem _transform = default!;
-    [Dependency] private readonly SharedPopupSystem _popup = default!;
-    [Dependency] private readonly SharedAudioSystem _audio = default!;
-    [Dependency] private readonly StandingStateSystem _standing = default!;
+    [Robust.Shared.IoC.Dependency] private readonly IPrototypeManager _prototypeManager = default!;
+    [Robust.Shared.IoC.Dependency] private readonly INetManager _net = default!;
+    [Robust.Shared.IoC.Dependency] private readonly SharedTransformSystem _transform = default!;
+    [Robust.Shared.IoC.Dependency] private readonly SharedPopupSystem _popup = default!;
+    [Robust.Shared.IoC.Dependency] private readonly SharedAudioSystem _audio = default!;
+    [Robust.Shared.IoC.Dependency] private readonly StandingStateSystem _standing = default!;
 
     public static readonly SoundSpecifier BackstabSound =
         new SoundPathSpecifier("/Audio/_Goobstation/Weapons/Effects/guillotine.ogg");
@@ -67,7 +69,19 @@ public sealed class BackStabSystem : EntitySystem
         var userXform = Transform(user);
         var v1 = -_transform.GetWorldRotation(xform).ToWorldVec();
         var v2 = _transform.GetWorldPosition(userXform) - _transform.GetWorldPosition(xform);
-        var angle = Vector3.CalculateAngle(new Vector3(v1), new Vector3(v2));
+        var angle = CalculateAngle(v1, v2);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static float CalculateAngle(Vector2 first, Vector2 second)
+        {
+            return MathF.Acos(Dot(first, second) / (first.Length() * second.Length()));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static float Dot(Vector2 left, Vector2 right)
+        {
+            return left.X * right.X + left.Y * right.Y;
+        }
 
         if (angle > tolerance.Theta)
             return false;
