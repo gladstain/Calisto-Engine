@@ -64,6 +64,7 @@ public abstract partial class SharedMoverController : VirtualController
     protected EntityQuery<NoRotateOnMoveComponent> NoRotateQuery;
     protected EntityQuery<FootstepModifierComponent> FootstepModifierQuery;
     protected EntityQuery<MapGridComponent> MapGridQuery;
+    protected EntityQuery<SleepingComponent> SleepingQuery;
 
     /// <summary>
     /// <see cref="CCVars.StopSpeed"/>
@@ -93,6 +94,7 @@ public abstract partial class SharedMoverController : VirtualController
         CanMoveInAirQuery = GetEntityQuery<CanMoveInAirComponent>();
         FootstepModifierQuery = GetEntityQuery<FootstepModifierComponent>();
         MapGridQuery = GetEntityQuery<MapGridComponent>();
+        SleepingQuery = GetEntityQuery<SleepingComponent>();
 
         InitializeInput();
         InitializeRelay();
@@ -129,7 +131,7 @@ public abstract partial class SharedMoverController : VirtualController
         if (RelayTargetQuery.TryGetComponent(uid, out var relayTarget))
         {
             if (_mobState.IsIncapacitated(relayTarget.Source) ||
-                TryComp<SleepingComponent>(relayTarget.Source, out _) ||
+                SleepingQuery.TryComp(relayTarget.Source, out _) ||
                 // Shitmed Change
                 !PhysicsQuery.TryGetComponent(relayTarget.Source, out var relayedPhysicsComponent) ||
                 !MoverQuery.TryGetComponent(relayTarget.Source, out var relayedMover) ||
@@ -151,8 +153,8 @@ public abstract partial class SharedMoverController : VirtualController
         {
             if (mover.LerpTarget < Timing.CurTime)
             {
-                if (TryComp(uid, out RelayInputMoverComponent? relay)
-                    && TryComp(relay.RelayEntity, out TransformComponent? relayXform))
+                if (RelayQuery.TryComp(uid, out var relay)
+                    && XformQuery.TryComp(relay.RelayEntity, out var relayXform))
                 {
                     if (TryUpdateRelative(mover, relayXform))
                         Dirty(uid, mover);
@@ -195,7 +197,7 @@ public abstract partial class SharedMoverController : VirtualController
                 // No gravity: is our entity touching anything?
                 touching = ev.CanMove;
 
-                if (!touching && TryComp<MobMoverComponent>(uid, out var mobMover))
+                if (!touching && MobMoverQuery.TryComp(uid, out var mobMover))
                     touching |= IsAroundCollider(PhysicsSystem, xform, mobMover, physicsUid, physicsComponent);
             }
         }
@@ -426,7 +428,7 @@ public abstract partial class SharedMoverController : VirtualController
                 !otherCollider.CanCollide ||
                 ((collider.CollisionMask & otherCollider.CollisionLayer) == 0 &&
                 (otherCollider.CollisionMask & collider.CollisionLayer) == 0) ||
-                (TryComp(otherCollider.Owner, out PullableComponent? pullable) && pullable.BeingPulled))
+                (PullableQuery.TryComp(otherCollider.Owner, out var pullable) && pullable.BeingPulled))
             {
                 continue;
             }

@@ -17,6 +17,8 @@ namespace Content.Server.Power.EntitySystems;
 
 public sealed class ApcSystem : EntitySystem
 {
+    private static readonly Enum UiKey = ApcUiKey.Key;
+
     [Dependency] private readonly AccessReaderSystem _accessReader = default!;
     [Dependency] private readonly IGameTiming _gameTiming = default!;
     [Dependency] private readonly EmagSystem _emag = default!;
@@ -25,9 +27,17 @@ public sealed class ApcSystem : EntitySystem
     [Dependency] private readonly SharedAudioSystem _audio = default!;
     [Dependency] private readonly UserInterfaceSystem _ui = default!;
 
+    private EntityQuery<PowerNetworkBatteryComponent> _powerNetworkBatteryQuery;
+    private EntityQuery<UserInterfaceComponent> _uiQuery;
+    private EntityQuery<AppearanceComponent> _appearanceQuery;
+
     public override void Initialize()
     {
         base.Initialize();
+
+        _powerNetworkBatteryQuery = GetEntityQuery<PowerNetworkBatteryComponent>();
+        _uiQuery = GetEntityQuery<UserInterfaceComponent>();
+        _appearanceQuery = GetEntityQuery<AppearanceComponent>();
 
         UpdatesAfter.Add(typeof(PowerNetSystem));
 
@@ -46,11 +56,11 @@ public sealed class ApcSystem : EntitySystem
         var query = EntityQueryEnumerator<ApcComponent>();
         while (query.MoveNext(out var uid, out var apc))
         {
-            if (!TryComp(uid, out PowerNetworkBatteryComponent? battery)
-                || !TryComp(uid, out UserInterfaceComponent? ui))
+            if (!_powerNetworkBatteryQuery.TryComp(uid, out var battery)
+                || !_uiQuery.TryComp(uid, out var ui))
                 continue;
 
-            if (apc.LastUiUpdate + ApcComponent.VisualsChangeDelay < _gameTiming.CurTime && _ui.IsUiOpen((uid, ui), ApcUiKey.Key))
+            if (apc.LastUiUpdate + ApcComponent.VisualsChangeDelay < _gameTiming.CurTime && _ui.IsUiOpen((uid, ui), UiKey))
             {
                 apc.LastUiUpdate = _gameTiming.CurTime;
                 UpdateUIState(uid, apc, battery);
@@ -141,7 +151,7 @@ public sealed class ApcSystem : EntitySystem
                 apc.LastChargeState = newState;
                 apc.LastChargeStateTime = _gameTiming.CurTime;
 
-                if (TryComp(uid, out AppearanceComponent? appearance))
+                if (_appearanceQuery.TryComp(uid, out var appearance))
                 {
                     _appearance.SetData(uid, ApcVisuals.ChargeState, newState, appearance);
                 }

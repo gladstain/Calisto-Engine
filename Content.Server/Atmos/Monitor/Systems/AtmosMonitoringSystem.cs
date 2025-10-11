@@ -42,8 +42,12 @@ public sealed class AtmosMonitorSystem : EntitySystem
 
     public const string AtmosMonitorThresholdGasType = "atmos_monitor_threshold_gas";
 
+    private EntityQuery<AtmosDeviceComponent> _atmosDeviceQuery;
+
     public override void Initialize()
     {
+        _atmosDeviceQuery = GetEntityQuery<AtmosDeviceComponent>();
+
         SubscribeLocalEvent<AtmosMonitorComponent, ComponentStartup>(OnAtmosMonitorStartup);
         SubscribeLocalEvent<AtmosMonitorComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<AtmosMonitorComponent, AtmosDeviceUpdateEvent>(OnAtmosUpdate);
@@ -177,7 +181,7 @@ public sealed class AtmosMonitorSystem : EntitySystem
 
     private void OnPowerChangedEvent(Entity<AtmosMonitorComponent> ent, ref PowerChangedEvent args)
     {
-        if (TryComp<AtmosDeviceComponent>(ent, out var atmosDeviceComponent))
+        if (_atmosDeviceQuery.TryComp(ent, out var atmosDeviceComponent))
         {
             if (!args.Powered)
             {
