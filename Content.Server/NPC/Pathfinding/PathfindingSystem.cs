@@ -834,7 +834,7 @@ namespace Content.Server.NPC.Pathfinding
 
                 System.BuildNavmesh(chunk, Pathfinding);
                 #if DEBUG
-                    Interlocked.Increment(ref updateCount);
+                //    Interlocked.Increment(ref updateCount);
                 #endif
             }
         }
