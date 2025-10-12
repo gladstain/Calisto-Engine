@@ -14,7 +14,7 @@ public sealed class LavalandMapOptimizationSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<LavalandMapComponent, BeforeLoadChunkEvent>(BeforeChunkLoad);
+        //SubscribeLocalEvent<LavalandMapComponent, BeforeLoadChunkEvent>(BeforeChunkLoad);
         SubscribeLocalEvent<LavalandMapComponent, UnLoadChunkEvent>(OnChunkUnLoaded);
         SubscribeLocalEvent<LavalandMapComponent, MapInitEvent>(OnChunkLoad);
     }

@@ -345,8 +345,7 @@ public sealed partial class BiomeSystem : SharedBiomeSystem
             if (_xformQuery.TryGetComponent(pSession.AttachedEntity, out var xform) &&
                 _handledEntities.Add(pSession.AttachedEntity.Value) &&
                  _biomeQuery.TryGetComponent(xform.MapUid, out var biome) &&
-                biome.Enabled &&
-                CanLoad(pSession.AttachedEntity.Value))
+                biome.Enabled)
             {
                 var worldPos = _transform.GetWorldPosition(xform);
                 AddChunksInRange(biome, worldPos);
@@ -363,8 +362,7 @@ public sealed partial class BiomeSystem : SharedBiomeSystem
                 if (!_handledEntities.Add(viewer) ||
                     !_xformQuery.TryGetComponent(viewer, out xform) ||
                     !_biomeQuery.TryGetComponent(xform.MapUid, out biome) ||
-                    !biome.Enabled ||
-                    !CanLoad(viewer))
+                    !biome.Enabled)
                 {
                     continue;
                 }
