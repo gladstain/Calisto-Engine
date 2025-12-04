@@ -220,8 +220,12 @@
   description: Raise or lower your shield.
   components:
   - type: InstantAction
-    icon: { sprite: Objects/Weapons/Melee/shields.rsi, state: teleriot-icon }
-    iconOn: Objects/Weapons/Melee/shields.rsi/teleriot-on.png
+    icon:
+      sprite: Objects/Weapons/Melee/shields.rsi
+      state: teleriot-icon
+    iconOn:
+      sprite: Objects/Weapons/Melee/shields.rsi
+      state: teleriot-on
     event: !type:ToggleActionEvent
 
 - type: entity
